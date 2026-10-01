@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>汉语课堂互动课件 - 真人男女声对话</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --male-color: #0284c7;
+      --female-color: #e11d48;
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --pinyin-color: #d97706;
+      --en-color: #475569;
+      --border-color: #e2e8f0;
+      --highlight: #fef3c7;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    .container { max-width: 880px; margin: 0 auto; }
+
+    header {
+      background: var(--card-bg);
+      padding: 18px 24px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      margin-bottom: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    h1 { font-size: 1.4rem; font-weight: 700; color: #1e293b; }
+
+    .global-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .speed-selector {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #f1f5f9;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    select {
+      background: transparent;
+      border: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--primary);
+      cursor: pointer;
+      outline: none;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      outline: none;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-global { background: #f1f5f9; color: #334155; }
+    .btn-global:hover { background: #e2e8f0; }
+
+    .btn-male {
+      background: #f0f9ff;
+      color: var(--male-color);
+      border: 1px solid #bae6fd;
+    }
+    .btn-male:hover { background: #e0f2fe; }
+
+    .btn-female {
+      background: #fff1f2;
+      color: var(--female-color);
+      border: 1px solid #fecdd3;
+    }
+    .btn-female:hover { background: #ffe4e6; }
+
+    .btn-q {
+      background: #f5f3ff;
+      color: #7c3aed;
+      border: 1px solid #ddd6fe;
+    }
+    .btn-q:hover { background: #ede9fe; }
+
+    .btn-pinyin {
+      background: #fffbeb;
+      color: #b45309;
+      border: 1px solid #fde68a;
+    }
+    .btn-pinyin.active { background: #f59e0b; color: #fff; }
+
+    .btn-en {
+      background: #f8fafc;
+      color: #475569;
+      border: 1px solid #cbd5e1;
+    }
+    .btn-en.active { background: #0284c7; color: #fff; border-color: #0284c7; }
+
+    .card-list { display: flex; flex-direction: column; gap: 20px; }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.03);
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #e0e7ff;
+      color: #4338ca;
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+
+    .sentence-block {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      background: #f8fafc;
+      border: 1px solid #edf2f7;
+      transition: background-color 0.2s;
+    }
+
+    .sentence-block.speaking {
+      background-color: var(--highlight) !important;
+      border-color: #f59e0b !important;
+    }
+
+    .sentence-block.question-block {
+      background: #fefaf4;
+      border: 1px solid #fed7aa;
+    }
+
+    .line-text-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      flex: 1;
+    }
+
+    .pinyin-text {
+      font-size: 0.95rem;
+      color: var(--pinyin-color);
+      font-weight: 500;
+      display: none;
+    }
+    .pinyin-text.show { display: block; }
+
+    .hanzi-text {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .speaker-tag {
+      font-weight: 800;
+      margin-right: 8px;
+    }
+    .speaker-A { color: var(--male-color); }
+    .speaker-B { color: var(--female-color); }
+    .speaker-Q { color: #7c3aed; }
+
+    .en-text {
+      font-size: 0.92rem;
+      color: var(--en-color);
+      font-style: italic;
+      display: none;
+    }
+    .en-text.show { display: block; }
+
+    .line-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>🎧 汉语对话互动课件（A男声 / B女声）</h1>
+      <div class="global-controls">
+        <div class="speed-selector">
+          <span>语速:</span>
+          <select id="speedSelect">
+            <option value="0.75">较慢 (0.75x)</option>
+            <option value="0.88" selected>适中 (0.88x)</option>
+            <option value="1.0">原速 (1.0x)</option>
+          </select>
+        </div>
+        <button class="btn-global" onclick="toggleAll('pinyin')">拼音 开/关</button>
+        <button class="btn-global" onclick="toggleAll('en')">英文 开/关</button>
+      </div>
+    </header>
+
+    <main class="card-list" id="cardContainer"></main>
+  </div>
+
+  <script>
+    const lessonData = [
+      {
+        id: 1,
+        dialog: [
+          { speaker: "A", role: "male", hanzi: "我的椅子在哪儿？", pinyin: "Wǒ de yǐzi zài nǎr?", en: "Where is my chair?" },
+          { speaker: "B", role: "female", hanzi: "我帮你放到房间里了。", pinyin: "Wǒ bāng nǐ fàng dào fángjiān lǐ le.", en: "I helped you put it in the room." }
+        ],
+        question: { speaker: "Question", role: "female", hanzi: "Ta的椅子在哪儿？", pinyin: "Tā de yǐzi zài nǎr?", en: "Where is his/her chair?" }
+      },
+      {
+        id: 2,
+        dialog: [
+          { speaker: "A", role: "male", hanzi: "你买了什么颜色的沙发？", pinyin: "Nǐ mǎi le shénme yánsè de shāfā?", en: "What color sofa did you buy?" },
+          { speaker: "B", role: "female", hanzi: "我买了红色的沙发。", pinyin: "Wǒ mǎi le hóngsè de shāfā.", en: "I bought a red sofa." }
+        ],
+        question: { speaker: "Question", role: "female", hanzi: "Ta买了什么颜色的沙发？", pinyin: "Tā mǎi le shénme yánsè de shāfā?", en: "What color sofa did he/she buy?" }
+      },
+      {
+        id: 3,
+        dialog: [
+          { speaker: "A", role: "male", hanzi: "你住在几楼？", pinyin: "Nǐ zhù zài jǐ lóu?", en: "Which floor do you live on?" },
+          { speaker: "B", role: "female", hanzi: "以前我住在十一楼。现在我搬家了，我住在十五楼。", pinyin: "Yǐqián wǒ zhù zài shíyī lóu. Xiànzài wǒ bānjiā le, wǒ zhù zài shíwǔ lóu.", en: "Before I lived on the 11th floor. Now I moved, I live on the 15th floor." }
+        ],
+        question: { speaker: "Question", role: "female", hanzi: "Ta现在住在几楼？", pinyin: "Tā xiànzài zhù zài jǐ lóu?", en: "Which floor does he/she live on now?" }
+      },
+      {
+        id: 4,
+        dialog: [
+          { speaker: "A", role: "male", hanzi: "你刷牙了吗？", pinyin: "Nǐ shuāyá le ma?", en: "Have you brushed your teeth?" },
+          { speaker: "B", role: "female", hanzi: "我刷牙了，但是哥哥和弟弟还没有刷牙。", pinyin: "Wǒ shuāyá le, dànshì gēge hé dìdi hái méiyǒu shuāyá.", en: "I have, but older brother and younger brother haven't brushed yet." }
+        ],
+        question: { speaker: "Question", role: "female", hanzi: "谁还没有刷牙？", pinyin: "Shéi hái méiyǒu shuāyá?", en: "Who hasn't brushed their teeth yet?" }
+      },
+      {
+        id: 5,
+        dialog: [
+          { speaker: "A", role: "male", hanzi: "为什么我的毛巾在书架上？", pinyin: "Wèishénme wǒ de máojīn zài shūjià shang?", en: "Why is my towel on the bookshelf?" },
+          { speaker: "B", role: "female", hanzi: "我不知道，我没用过你的毛巾。", pinyin: "Wǒ bù zhīdào, wǒ méi yòng guo nǐ de máojīn.", en: "I don't know, I haven't used your towel." }
+        ],
+        question: { speaker: "Question", role: "female", hanzi: "Ta的毛巾在哪里？", pinyin: "Tā de máojīn zài nǎli?", en: "Where is his/her towel?" }
+      },
+      {
+        id: 6,
+        dialog: [
+          { speaker: "A", role: "male", hanzi: "你昨天做了什么？", pinyin: "Nǐ zuótiān zuò le shénme?", en: "What did you do yesterday?" },
+          { speaker: "B", role: "female", hanzi: "我昨天在家帮爸爸妈妈做了家务。", pinyin: "Wǒ zuótiān zài jiā bāng bàba māma zuò le jiāwù.", en: "Yesterday at home I helped parents with housework." }
+        ],
+        question: { speaker: "Question", role: "female", hanzi: "Ta昨天做了什么？", pinyin: "Tā zuótiān zuò le shénme?", en: "What did he/she do yesterday?" }
+      },
+      {
+        id: 7,
+        dialog: [
+          { speaker: "A", role: "male", hanzi: "你想穿什么颜色的衣服？", pinyin: "Nǐ xiǎng chuān shénme yánsè de yīfu?", en: "What color clothes do you want to wear?" },
+          { speaker: "B", role: "female", hanzi: "蓝色的，不，还是穿绿色的衣服吧。", pinyin: "Lánsè de, bù, háishì chuān lǜsè de yīfu ba.", en: "Blue... no, let's wear green clothes." }
+        ],
+        question: { speaker: "Question", role: "female", hanzi: "Ta想穿什么颜色的衣服？", pinyin: "Tā xiǎng chuān shénme yánsè de yīfu?", en: "What color clothes does he/she want to wear?" }
+      },
+      {
+        id: 8,
+        dialog: [
+          { speaker: "A", role: "male", hanzi: "我的书在哪儿？我记得我放在书包里了。", pinyin: "Wǒ de shū zài nǎr? Wǒ jìde wǒ fàng zài shūbāo lǐ le.", en: "Where is my book? I remember I put it in my bag." },
+          { speaker: "B", role: "female", hanzi: "我刚刚帮你放在书架上了。", pinyin: "Wǒ gānggāng bāng nǐ fàng zài shūjià shang le.", en: "I just helped you place it on the bookshelf." }
+        ],
+        question: { speaker: "Question", role: "female", hanzi: "Ta的书在哪儿？", pinyin: "Tā de shū zài nǎr?", en: "Where is his/her book?" }
+      },
+      {
+        id: 9,
+        dialog: [
+          { speaker: "A", role: "male", hanzi: "你们家谁会做饭？", pinyin: "Nǐmen jiā shéi huì zuòfàn?", en: "Who knows how to cook in your family?" },
+          { speaker: "B", role: "female", hanzi: "我的爸爸，他会做很多中国菜。", pinyin: "Wǒ de bàba, tā huì zuò hěn duō Zhōngguócài.", en: "My dad, he can cook lots of Chinese dishes." }
+        ],
+        question: { speaker: "Question", role: "female", hanzi: "Ta们家谁会做饭？", pinyin: "Tāmen jiā shéi huì zuòfàn?", en: "Who can cook in their family?" }
+      },
+      {
+        id: 10,
+        dialog: [],
+        questions: [
+          { speaker: "1", role: "female", hanzi: "你通常每天几点睡觉？", pinyin: "Nǐ tōngcháng měitiān jǐ diǎn shuìjiào?", en: "What time do you usually sleep?" },
+          { speaker: "2", role: "male", hanzi: "你们家通常谁做饭？", pinyin: "Nǐmen jiā tōngcháng shéi zuòfàn?", en: "Who usually cooks in your home?" },
+          { speaker: "3", role: "female", hanzi: "起床以后，你会做什么？", pinyin: "Qǐchuáng yǐhòu, nǐ huì zuò shénme?", en: "What do you do after waking up?" }
+        ]
+      }
+    ];
+
+    let systemVoices = [];
+    function initVoices() {
+      systemVoices = window.speechSynthesis.getVoices();
+    }
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = initVoices;
+      initVoices();
+    }
+
+    // 智能选择真人音色并调整音调
+    function speakRole(text, role, elId) {
+      if (!('speechSynthesis' in window)) {
+        alert("浏览器不支持语音合成，推荐使用 Chrome 或 Edge 浏览器体验最自然的人声。");
+        return;
+      }
+      window.speechSynthesis.cancel();
+
+      const el = document.getElementById(elId);
+      if (el) el.classList.add('speaking');
+
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'zh-CN';
+      u.rate = parseFloat(document.getElementById('speedSelect').value);
+
+      const zhVoices = systemVoices.filter(v => v.lang.includes('zh') || v.lang.includes('cmn'));
+
+      if (role === 'male') {
+        // 优先匹配高质量中文自然男声：如 Yunxi (微软云希), Kangkang (康康)
+        const maleVoice = zhVoices.find(v => /yunxi|kangkang|male|男/i.test(v.name)) ||
+                          zhVoices.find(v => !/xiaoxiao|yaoyao|huihui|tingting|female|女/i.test(v.name));
+        if (maleVoice) u.voice = maleVoice;
+        u.pitch = 0.84; // 沉稳男声低音调
+      } else {
+        // 优先匹配高质量中文自然女声：如 Xiaoxiao (微软晓晓), Yaoyao (窈窈), Tingting (婷婷)
+        const femaleVoice = zhVoices.find(v => /xiaoxiao|yaoyao|huihui|tingting|female|女/i.test(v.name)) || zhVoices[0];
+        if (femaleVoice) u.voice = femaleVoice;
+        u.pitch = 1.1; // 清晰女声自然音调
+      }
+
+      u.onend = () => { if (el) el.classList.remove('speaking'); };
+      u.onerror = () => { if (el) el.classList.remove('speaking'); };
+
+      window.speechSynthesis.speak(u);
+    }
+
+    function toggle(id, btn) {
+      const el = document.getElementById(id);
+      el.classList.toggle('show');
+      btn.classList.toggle('active');
+    }
+
+    function toggleAll(cls) {
+      const items = document.querySelectorAll('.' + cls + '-text');
+      const show = !items[0].classList.contains('show');
+      items.forEach(el => el.classList.toggle('show', show));
+      document.querySelectorAll('.btn-' + cls).forEach(btn => btn.classList.toggle('active', show));
+    }
+
+    function renderCards() {
+      const container = document.getElementById('cardContainer');
+      container.innerHTML = '';
+
+      lessonData.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        let html = `<div><span class="badge">第 ${item.id} 题</span></div>`;
+
+        if (item.dialog && item.dialog.length > 0) {
+          item.dialog.forEach((l, i) => {
+            const blkId = `b-${item.id}-d${i}`;
+            const btnClass = l.role === 'male' ? 'btn-male' : 'btn-female';
+            const btnLabel = l.role === 'male' ? '👨 男声' : '👩 女声';
+
+            html += `
+              <div class="sentence-block" id="${blkId}">
+                <div class="line-text-wrap">
+                  <span class="pinyin-text" id="p-${item.id}-d${i}">${l.pinyin}</span>
+                  <span class="hanzi-text">
+                    <span class="speaker-tag speaker-${l.speaker}">${l.speaker}:</span>${l.hanzi}
+                  </span>
+                  <span class="en-text" id="e-${item.id}-d${i}">${l.en}</span>
+                </div>
+                <div class="line-actions">
+                  <button class="${btnClass}" onclick="speakRole('${l.hanzi}', '${l.role}', '${blkId}')">${btnLabel}</button>
+                  <button class="btn-pinyin" onclick="toggle('p-${item.id}-d${i}', this)">拼音</button>
+                  <button class="btn-en" onclick="toggle('e-${item.id}-d${i}', this)">英文</button>
+                </div>
+              </div>
+            `;
+          });
+        }
+
+        if (item.question) {
+          const q = item.question;
+          const blkId = `b-${item.id}-q`;
+          html += `
+            <div class="sentence-block question-block" id="${blkId}">
+              <div class="line-text-wrap">
+                <span class="pinyin-text" id="p-${item.id}-q">${q.pinyin}</span>
+                <span class="hanzi-text">
+                  <span class="speaker-tag speaker-Q">问:</span>${q.hanzi}
+                </span>
+                <span class="en-text" id="e-${item.id}-q">${q.en}</span>
+              </div>
+              <div class="line-actions">
+                <button class="btn-female" onclick="speakRole('${q.hanzi}', 'female', '${blkId}')">👩 问句</button>
+                <button class="btn-pinyin" onclick="toggle('p-${item.id}-q', this)">拼音</button>
+                <button class="btn-en" onclick="toggle('e-${item.id}-q', this)">英文</button>
+              </div>
+            </div>
+          `;
+        }
+
+        if (item.questions) {
+          item.questions.forEach((q, i) => {
+            const blkId = `b-${item.id}-q${i}`;
+            const btnClass = q.role === 'male' ? 'btn-male' : 'btn-female';
+            const btnLabel = q.role === 'male' ? '👨 男声' : '👩 女声';
+
+            html += `
+              <div class="sentence-block question-block" id="${blkId}">
+                <div class="line-text-wrap">
+                  <span class="pinyin-text" id="p-${item.id}-q${i}">${q.pinyin}</span>
+                  <span class="hanzi-text">
+                    <span class="speaker-tag speaker-Q">${q.speaker}.</span>${q.hanzi}
+                  </span>
+                  <span class="en-text" id="e-${item.id}-q${i}">${q.en}</span>
+                </div>
+                <div class="line-actions">
+                  <button class="${btnClass}" onclick="speakRole('${q.hanzi}', '${q.role}', '${blkId}')">${btnLabel}</button>
+                  <button class="btn-pinyin" onclick="toggle('p-${item.id}-q${i}', this)">拼音</button>
+                  <button class="btn-en" onclick="toggle('e-${item.id}-q${i}', this)">英文</button>
+                </div>
+              </div>
+            `;
+          });
+        }
+
+        card.innerHTML = html;
+        container.appendChild(card);
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', renderCards);
+  </script>
+</body>
+</html>
